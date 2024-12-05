@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Skin Analyzer</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Include Custom Styles -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .card {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .btn-primary {
+            background-color: #6c63ff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #5846d6;
+        }
+        .results {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card p-4">
+            <h1 class="text-center mb-4">AI Skin Analyzer</h1>
+            <form id="uploadForm" enctype="multipart/form-data" class="text-center">
+                <input type="file" id="image" name="image" accept="image/*" class="form-control mb-3" required>
+                <button type="submit" class="btn btn-primary btn-lg">Analyze</button>
+            </form>
+            <div id="results" class="results text-center"></div>
+        </div>
+    </div>
+
+    <!-- Include Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom Script -->
+    <script>
+        document.getElementById('uploadForm').onsubmit = async function (e) {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('image', document.getElementById('image').files[0]);
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>`;
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const results = await response.json();
+
+                if (results.error) {
+                    resultsDiv.innerHTML = `<div class="alert alert-danger" role="alert">${results.error}</div>`;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="alert alert-success" role="alert">
+                            <p><strong>Hydration Level:</strong> ${results.hydration_level}</p>
+                            <p><strong>Acne Risk:</strong> ${results.acne_risk}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="alert alert-danger" role="alert">Error: ${error.message}</div>`;
+            }
+        };
+    </script>
+</body>
+</html>
